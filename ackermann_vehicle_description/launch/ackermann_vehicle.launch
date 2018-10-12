@@ -29,7 +29,7 @@ limitations under the License.
     <param name="robot_description"
             command="$(find xacro)/xacro.py $(find ackermann_vehicle_description)/urdf/em_3905.urdf.xacro"/> -->
     <param name="robot_description"
-           command="$(find xacro)/xacro.py $(find ackermann_vehicle_description)/urdf/trooper_camera_imu.urdf.xacro"/>
+           command="$(find xacro)/xacro.py $(find ackermann_vehicle_description)/urdf/trooper_camera_imu_laser.urdf.xacro"/>
 
     <!-- Read joint positions from joint_states, then publish the vehicle's
          state to tf. -->
