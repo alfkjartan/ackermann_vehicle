@@ -38,8 +38,10 @@ limitations under the License.
 
 <robot name="Trooper" xmlns:xacro="http://www.ros.org/wiki/xacro">
   <!-- Degree-to-radian conversions -->
+  <xacro:property name="degrees_27" value="0.471"/>
   <xacro:property name="degrees_45" value="0.785398163"/>
   <xacro:property name="degrees_90" value="1.57079633"/>
+  <xacro:property name="degrees_180" value="3.141592"/>
 
   <!-- chassis_length is measured along the x axis, chassis_width
        along the y axis, and chassis_height along the z axis. -->
@@ -104,8 +106,11 @@ limitations under the License.
        axle_vel_limit = (2 * pi) * (max_speed / (pi * tire_dia)) =
          244.8696 rad/s -->
   <xacro:property name="axle_eff_limit" value="5.12766"/>
-  <xacro:property name="axle_vel_limit" value="244.8696"/>
-
+  <xacro:property name="axle_vel_limit" value="144.8696"/>
+  <!-- Limiting the max speed. This was the original:
+       <xacro:property name="axle_vel_limit" value="244.8696"/>
+  -->
+  
   <!-- These constants are used to simulate a Traxxas 2056 servo operated at
        6 V. servo_stall_torque is measured in N m. servo_no_load_speed is
        measured in rad/s. -->
@@ -315,8 +320,12 @@ limitations under the License.
       <parent link="${lr_prefix}_steering_link"/>
       <child link="${lr_prefix}_${fr_prefix}_axle_carrier"/>
       <axis xyz="0 0 1"/>
-      <limit lower="${-degrees_45}" upper="${degrees_45}"
+      <limit lower="${-degrees_27}" upper="${degrees_27}"
              effort="${servo_stall_torque}" velocity="${servo_no_load_speed}"/>
+      <!-- Limiting the steering angle to +/-27 degrees
+	  <limit lower="${-degrees_45}" upper="${degrees_45}"
+             effort="${servo_stall_torque}" velocity="${servo_no_load_speed}"/>
+	     -->
     </joint>
     <transmission name="${lr_prefix}_steering_trans">
       <type>transmission_interface/SimpleTransmission</type>
@@ -407,7 +416,7 @@ limitations under the License.
   <!-- Laser scanner -->
   <joint name="laser_joint" type="fixed">
     <axis xyz="0 1 0" />
-    <origin xyz="0 0 0.1" rpy="0 0 0"/>
+    <origin xyz="0 0 0.35" rpy="${degrees_180} 0 ${degrees_180}"/>
     <parent link="base_link"/>
     <child link="laser_link"/>
   </joint>
@@ -438,24 +447,26 @@ limitations under the License.
 
     <!-- Laser -->
   <gazebo reference="laser_link">
-    <sensor type="ray" name="head_hokuyo_sensor"> 
-    <!-- <sensor type="gpu_ray" name="head_hokuyo_sensor"> -->
-      <pose>0 0 0 0 0 0</pose>
+    <sensor type="ray" name="rplidar_sensor"> 
+      <pose>0 0 0 0 0</pose> 
       <visualize>true</visualize>
-      <update_rate>40</update_rate>
+      <update_rate>10</update_rate>
       <ray>
         <scan>
           <horizontal>
-            <samples>720</samples>
-            <resolution>1</resolution>
-            <min_angle>-1.570796</min_angle>
-            <max_angle>1.570796</max_angle>
+            <samples>360</samples>
+            <resolution>2</resolution>
+
+            <min_angle>-${degrees_180}</min_angle>
+            <max_angle>${degrees_180}</max_angle>
+            <!-- <min_angle>0</min_angle>
+            <max_angle>6.28</max_angle> -->
           </horizontal>
         </scan>
         <range>
           <min>0.10</min>
-          <max>30.0</max>
-          <resolution>0.01</resolution>
+          <max>18.0</max>
+          <resolution>0.002</resolution>
         </range>
         <noise>
           <type>gaussian</type>
@@ -464,7 +475,7 @@ limitations under the License.
                stddev of 0.01m will put 99.7% of samples within 0.03m of the true
                reading. -->
           <mean>0.0</mean>
-          <stddev>0.01</stddev>
+          <stddev>0.02</stddev>
         </noise>
       </ray>
       <plugin name="gazebo_ros_head_hokuyo_controller" filename="libgazebo_ros_laser.so">
@@ -479,7 +490,7 @@ limitations under the License.
   <!-- Camera -->
    <joint name="camera_joint" type="fixed">
     <axis xyz="0 1 0" />
-    <origin xyz="0 0 0.3" rpy="0 0.3 0"/>
+    <origin xyz="0 0 0.3" rpy="0 0.1 0"/>
     <parent link="base_link"/>
     <child link="camera_link"/>
   </joint>
@@ -536,10 +547,10 @@ limitations under the License.
     <sensor type="camera" name="camera1">
       <update_rate>30.0</update_rate>
       <camera name="head">
-        <horizontal_fov>1.9</horizontal_fov>
+        <horizontal_fov>1.5</horizontal_fov>
         <image>
-          <width>800</width>
-          <height>800</height>
+          <width>600</width>
+          <height>480</height>
           <format>R8G8B8</format>
         </image>
         <clip>
@@ -552,7 +563,7 @@ limitations under the License.
                That pixel's noise value is added to each of its color
                channels, which at that point lie in the range [0,1]. -->
           <mean>0.0</mean>
-          <stddev>0.007</stddev>
+          <stddev>0.07</stddev>
         </noise>
       </camera>
       <plugin name="camera_controller" filename="libgazebo_ros_camera.so">

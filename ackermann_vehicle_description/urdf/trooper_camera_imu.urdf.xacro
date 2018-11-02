@@ -406,7 +406,7 @@ limitations under the License.
   <!-- Camera -->
    <joint name="camera_joint" type="fixed">
     <axis xyz="0 1 0" />
-    <origin xyz="0 0 0.3" rpy="0 0.3 0"/>
+    <origin xyz="0 0 0.3" rpy="0 0.08 0"/>
     <parent link="base_link"/>
     <child link="camera_link"/>
   </joint>
@@ -465,8 +465,8 @@ limitations under the License.
       <camera name="head">
         <horizontal_fov>1.9</horizontal_fov>
         <image>
-          <width>800</width>
-          <height>800</height>
+          <width>600</width>
+          <height>480</height>
           <format>R8G8B8</format>
         </image>
         <clip>
